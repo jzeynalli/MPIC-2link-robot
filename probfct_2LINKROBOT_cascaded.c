@@ -16,9 +16,10 @@
  *
  *
  *
- * This probfct-file describes the single-axis ball on plate problem from
- * Richter, S.: Computational complexity certifcation of gradient methods
- * for real-time model predictive control. Ph.D. thesis, ETH Zürich (2012).
+ * This probfct-file describes the cascaded MPC of a 2-link planar robot
+ * with an inner joint impedance loop and contact force states.
+ * States x = [q1, q2, qd1, qd2, Fx, Fy], inputs u = [dqd1, dqd2].
+ * See docs/model.md for the equations and the userparam layout.
  *  
  *                                           _T
  *                                          /

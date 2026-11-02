@@ -1,14 +1,16 @@
 function [vec,grampc,figNr] = startMPC(figNr,md,compile, varargin)
-% This function runs the BallOnPlate example. It compiles the c-Code,
-% initializes the grampc struct, runs the simulation and plots the results.
+% This function runs the cascaded MPC of the 2-link planar robot with
+% wall/circle contact. It compiles the c-Code, initializes the grampc struct,
+% runs the simulation, plots the results and animates the robot.
 %
 % Input arguments are:
 % 1) figNr - number of the first plot
-% 2) compile - flag whether to compile the whole toolbox or/and the problem function: 
+% 2) md - scenario: 1: free motion, 2: contact with force feedback
+% 3) compile - flag whether to compile the whole toolbox or/and the problem function: 
 %              1: only the problem function is compiled
 %              2: the whole toolbox and the problem function is compiled
 %              else or empty input: nothing is compiled
-% 3 - end) - flags for the compilation (e.g. 'debug' or 'verbose') see 
+% 4 - end) - flags for the compilation (e.g. 'debug' or 'verbose') see 
 %            make.m in the matlab folder for more details
 %
 %

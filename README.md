@@ -1,69 +1,67 @@
-# GRAMPC example: 2-link planar robot with cascaded MPC and surface contact
+# MPIC-2link-robot
 
-Nonlinear model predictive control (MPC) of a 2-link planar robot arm that makes contact with its environment (a wall and a circular object). It is built on [GRAMPC v2.3](https://github.com/grampc/grampc). The MPC runs in a cascade around a joint-space impedance/PD controller. Contact forces come from a stiffness model of the environment and are fed back into the MPC through the effective stiffness `K_bar = (I + Ke·J·Kp⁻¹·Jᵀ)⁻¹·Ke`.
+Nonlinear model predictive control (MPC) of a 2-link planar robot in contact with its
+environment (a wall and a circular object), built on [GRAMPC v2.3](https://github.com/grampc/grampc).
+
+The MPC runs in a **cascade** around a joint-space impedance controller. It plans the joint
+reference rate `q̇_d`, and the contact force `F` is part of the prediction model. This lets the
+controller move to a target position in free space or apply a desired force on a surface.
 
 ## Repository layout
 
 ```
 .
-├── startMPC.m                      # main entry point: compile, simulate, plot, animate
-├── initData.m                      # GRAMPC options, parameters and user parameters
-├── probfct_2LINKROBOT_cascaded.c   # GRAMPC problem description (dynamics, cost, constraints)
-├── run_2link_planar.m              # symbolic derivation (Symbolic Math Toolbox) of model terms
-├── animateTwoLinkPlanar.m          # animation / video export
-├── forward_kinematics.m, inverse_kinematics.m, jacobian.m, ...
-├── fixedsize_settings.h            # GRAMPC fixed-size build settings
+├── startMPC.m                      # entry point: build, simulate, plot, animate
+├── initData.m                      # GRAMPC options, setpoints, weights, gains
+├── probfct_2LINKROBOT_cascaded.c   # GRAMPC problem: dynamics, cost, gradients
+├── run_2link_planar.m              # symbolic derivation of the C expressions
+├── animateTwoLinkPlanar.m          # animation and video export
+├── forward_kinematics.m, inverse_kinematics.m, jacobian.m
+├── twoLinkPlanarODE.m, cartesianJTController.m, printTwoLinkXdot.m   # auxiliary
+├── docs/                           # documentation
 └── external/grampc/                # GRAMPC v2.3 (git submodule, unmodified)
 ```
 
-## Requirements
+## Quick start
 
-- MATLAB (tested with R2025b) and a C compiler set up for MEX (`mex -setup C`)
-- Symbolic Math Toolbox (only for `run_2link_planar.m`)
-- Git
-
-## Getting started
-
-Clone the repository with its GRAMPC submodule:
+Requirements: MATLAB with a MEX C compiler (`mex -setup C`), Git, and the Symbolic Math
+Toolbox (only to regenerate derivatives).
 
 ```bash
-git clone --recursive https://github.com/<your-user>/grampc-2link-cascaded-surface.git
+git clone --recursive https://github.com/jzeynalli/MPIC-2link-robot.git
 ```
 
-If you already cloned it without `--recursive`:
-
-```bash
-git submodule update --init
-```
-
-> On Windows, run `git config --global core.longpaths true` first if the clone fails with *Filename too long*.
-
-Then, in MATLAB, with the **repository root** as the current folder:
+In MATLAB, with the repository root as the current folder:
 
 ```matlab
-% first run: compile the GRAMPC toolbox and the problem function
-startMPC(1, 2, 2);
-
-% later runs (nothing is recompiled)
-startMPC(1, 2);
+startMPC(1, 2, 2);   % first run: compile GRAMPC + problem, contact scenario
+startMPC(1, 1);      % free-motion scenario, no recompilation
 ```
 
-Arguments of `startMPC(figNr, md, compile)`:
+`startMPC(figNr, md, compile)`: `md = 1` free motion, `md = 2` contact with force feedback;
+`compile = 0/1/2` builds nothing / the problem function / GRAMPC and the problem function.
 
-| Argument  | Meaning |
-|-----------|---------|
-| `figNr`   | number of the first figure (`0` turns plotting off) |
-| `md`      | `1`: free motion, no contact force feedback; `2`: wall/circle contact with force feedback |
-| `compile` | `0`: no compilation, `1`: problem function only, `2`: GRAMPC toolbox and problem function |
+## Documentation
 
-Compiled files (`+CmexFiles/`, `external/grampc/matlab/bin/`) and the recorded animation (`robot_sim.mp4`) are generated locally and are not tracked by git.
+- [Usage guide](docs/usage.md): setup, running, scenarios, common changes, troubleshooting
+- [Model and OCP](docs/model.md): states, dynamics, cost function, parameter vector, contact model
+- [Code reference](docs/code-reference.md): every file and function
 
-## Citation
+## Author
 
-If you use this example, please also cite GRAMPC:
+Jahandar Zeynalli
 
-> T. Englert, A. Völz, F. Mesmer, S. Rhein, K. Graichen: *A software framework for embedded nonlinear model predictive control using a gradient-based augmented Lagrangian approach (GRAMPC)*. Optimization and Engineering 20, 769–809 (2019). https://doi.org/10.1007/s11081-018-9417-2
+## Acknowledgements and license
 
-## License
+This project is released under the BSD-3-Clause license, see [LICENSE](LICENSE).
 
-The example code in this repository is released under the BSD-3-Clause license, see [LICENSE](LICENSE). Parts of `startMPC.m` and `initData.m` are derived from the GRAMPC templates and keep the GRAMPC copyright notice. GRAMPC itself is included as an unmodified submodule under its own [BSD-3-Clause license](https://github.com/grampc/grampc/blob/v2.3/LICENSE.txt).
+It uses [GRAMPC](https://github.com/grampc/grampc) (BSD-3-Clause) as an unmodified git
+submodule. `startMPC.m`, `initData.m` and `probfct_2LINKROBOT_cascaded.c` are based on the
+GRAMPC example templates and keep the GRAMPC copyright notice. `forward_kinematics.m`,
+`inverse_kinematics.m` and `jacobian.m` come from the Robotics 1 lecture
+(© 2023 Andreas Völz). If you use GRAMPC results, please cite:
+
+> T. Englert, A. Völz, F. Mesmer, S. Rhein, K. Graichen: *A software framework for embedded
+> nonlinear model predictive control using a gradient-based augmented Lagrangian approach
+> (GRAMPC)*. Optimization and Engineering 20, 769–809 (2019).
+> https://doi.org/10.1007/s11081-018-9417-2
