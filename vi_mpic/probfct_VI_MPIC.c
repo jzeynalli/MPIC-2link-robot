@@ -85,6 +85,12 @@
 #define UP_VARK   46   /* 1: ds/dt is a decision variable (VI-MPIC), 0: fixed gains */
 #define UP_QV     47   /* weight on the normal reference velocity J0(1,:) dqd/dt    */
 #define UP_VAPP   48   /* desired normal reference velocity (guarded approach) [m/s] */
+/* sanding stroke along the wall, added for the FC-MPIC comparison (fc_mpic/);
+ * zero amplitude and UP_FF = 0 give the first draft unchanged */
+#define UP_YA     49   /* stroke amplitude A: py* = pdes_y + A (1 - cos(w (t - t0)))  */
+#define UP_YW     50   /* stroke angular frequency w [rad/s]                          */
+#define UP_YT0    51   /* horizon time t0 at which the stroke starts [s]              */
+#define UP_FF     52   /* 1: input cost on u_q - u*, u* = J0^-1 (0, d(py*)/dt)          */
 
 #define UP(i) (((const double *)userparam)[i])
 
@@ -185,13 +191,31 @@ static void fkin(double *pe, double *J, ctypeRNum *q)
     J[3] = LINK2 * c12;
 }
 
-/* EE position target at horizon time t: hold, or guarded approach ramp along x */
+/* sanding stroke along the wall at horizon time t: offset of py* and its velocity */
+static void stroke(double *dy, double *vy, double t, typeUSERPARAM *userparam)
+{
+    const double tau = t - UP(UP_YT0);
+    const double w = UP(UP_YW);
+
+    *dy = 0.0;
+    *vy = 0.0;
+    if (tau > 0.0)
+    {
+        *dy = UP(UP_YA) * (1.0 - cos(w * tau));
+        *vy = UP(UP_YA) * w * sin(w * tau);
+    }
+}
+
+/* EE position target at horizon time t: hold, or guarded approach ramp along x,
+ * plus the stroke along y */
 static void target(double *pd, double t, typeUSERPARAM *userparam)
 {
     const double tm = t - UP(UP_TDELAY);
+    double dy, vy;
 
+    stroke(&dy, &vy, t, userparam);
     pd[0] = UP(UP_PDES);
-    pd[1] = UP(UP_PDES + 1);
+    pd[1] = UP(UP_PDES + 1) + dy;
     if (UP(UP_VDES) > 0.0 && tm > 0.0)
     {
         pd[0] += UP(UP_VDES) * tm;
@@ -200,6 +224,16 @@ static void target(double *pd, double t, typeUSERPARAM *userparam)
             pd[0] = UP(UP_PXMAX);
         }
     }
+}
+
+/* velocity feed-forward of the stroke, u* = J0^-1 (0, d(py*)/dt) (Gold et al. Sec. III-D) */
+static void feedforward(double *us, double t, typeUSERPARAM *userparam)
+{
+    double dy, vy;
+
+    stroke(&dy, &vy, t, userparam);
+    us[0] = UP(UP_FF) * UP(UP_J0INV + 1) * vy;
+    us[1] = UP(UP_FF) * UP(UP_J0INV + 3) * vy;
 }
 
 /* uncertainty-aware stiffness cost, notes eq. (30), per Cartesian axis:
@@ -357,19 +391,20 @@ void dfdp_vec(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum 
     -------------------------------------------------- **/
 void lfct(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
-    double pe[2], J[4], pr[2], Jr[4], pd[2];
+    double pe[2], J[4], pr[2], Jr[4], pd[2], us[2];
     const double rn = UP(UP_J0) * u[0] + UP(UP_J0 + 1) * u[1];
     Gate G;
 
     fkin(pe, J, x);
     fkin(pr, Jr, x + 2);
     target(pd, t, userparam);
+    feedforward(us, t, userparam);
     gateEval(&G, depth(x, userparam), userparam);
 
     out[0] = 0.5 * (UP(UP_QP) * POW2(pe[0] - pd[0]) + UP(UP_QP + 1) * POW2(pe[1] - pd[1])
                   + UP(UP_QR) * POW2(pr[0] - pd[0]) + UP(UP_QR + 1) * POW2(pr[1] - pd[1])
                   + UP(UP_QF) * POW2(x[4] - UP(UP_FDES)) + UP(UP_QF + 1) * POW2(x[5] - UP(UP_FDES + 1))
-                  + UP(UP_RQ) * (POW2(u[0]) + POW2(u[1]))
+                  + UP(UP_RQ) * (POW2(u[0] - us[0]) + POW2(u[1] - us[1]))
                   + UP(UP_QV) * POW2(rn - UP(UP_VAPP)))
            + stiffnessCost(x, u, &G, userparam);
 }
@@ -425,9 +460,11 @@ void dldx(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, 
 void dldu(typeRNum *out, ctypeRNum t, ctypeRNum *x, ctypeRNum *u, ctypeRNum *p, const typeGRAMPCparam *param, typeUSERPARAM *userparam)
 {
     const double ev = UP(UP_QV) * (UP(UP_J0) * u[0] + UP(UP_J0 + 1) * u[1] - UP(UP_VAPP));
+    double us[2];
 
-    out[0] = UP(UP_RQ) * u[0] + ev * UP(UP_J0);
-    out[1] = UP(UP_RQ) * u[1] + ev * UP(UP_J0 + 1);
+    feedforward(us, t, userparam);
+    out[0] = UP(UP_RQ) * (u[0] - us[0]) + ev * UP(UP_J0);
+    out[1] = UP(UP_RQ) * (u[1] - us[1]) + ev * UP(UP_J0 + 1);
     out[2] = UP(UP_VARK) * UP(UP_RS) * u[2];
     out[3] = UP(UP_VARK) * UP(UP_RS) * u[3];
 }

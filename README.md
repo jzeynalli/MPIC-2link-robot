@@ -20,6 +20,7 @@ controller move to a target position in free space or apply a desired force on a
 ├── twoLinkPlanarODE.m, cartesianJTController.m, printTwoLinkXdot.m   # auxiliary
 ├── docs/                           # documentation
 ├── vi_mpic/                        # VI-MPIC draft and benchmark (branch vi-mpic)
+├── fc_mpic/                        # FC-MPIC and its comparison with MPIC and VI-MPIC (branch fc-mpic)
 └── external/grampc/                # GRAMPC v2.3 (git submodule, unmodified)
 ```
 
@@ -49,6 +50,9 @@ startMPC(1, 1);      % free-motion scenario, no recompilation
 - [Code reference](docs/code-reference.md): every file and function
 - [VI-MPIC draft and evaluation](docs/vi-mpic.md): variable-impedance MPIC for this robot and a
   benchmark against classical MPIC (code in [vi_mpic/](vi_mpic))
+- [FC-MPIC and comparison](docs/fc-mpic.md): friction-consistent MPIC for this robot and a
+  benchmark against classical MPIC and VI-MPIC in a sanding task with friction (code in
+  [fc_mpic/](fc_mpic))
 
 ## Author
 

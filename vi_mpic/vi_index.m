@@ -35,5 +35,10 @@ I.Qr     = 45:46;   % weights on the desired-frame position FK(qd) (x, y)
 I.vark   = 47;      % 1: ds/dt is a decision variable (VI-MPIC)
 I.Qv     = 48;      % weight on the normal reference velocity
 I.vapp   = 49;      % desired normal reference velocity [m/s]
-I.len    = 49;
+% sanding stroke along the wall (FC-MPIC comparison, fc_mpic/); zeros keep the first draft
+I.ya     = 50;      % stroke amplitude [m]
+I.yw     = 51;      % stroke angular frequency [rad/s]
+I.yt0    = 52;      % horizon time at which the stroke starts [s]
+I.ff     = 53;      % 1: input cost on dqd/dt - u*, u* the stroke feed-forward
+I.len    = 53;
 end

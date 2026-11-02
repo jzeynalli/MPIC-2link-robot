@@ -1,0 +1,15 @@
+ctrl,name,iterations,cpu_med_ms,cpu_p95_ms
+joint,mpic,10,0.1407,0.1494
+joint,mpic_d,10,0.1646,0.1935
+joint,fc,10,0.284,0.3454
+joint,slide,10,0.1745,0.2221
+cart,mpic,10,0.1404,0.1723
+cart,fc,10,0.28815,0.3539
+cart,vimpic,10,0.5728,0.8811
+joint,mpic,50,0.66675,0.7959
+joint,mpic_d,50,0.7717,0.8883
+joint,fc,50,1.3788,1.8268
+joint,slide,50,0.8213,1.0267
+cart,mpic,50,0.6671,0.7792
+cart,fc,50,1.3741,1.7536
+cart,vimpic,50,2.76415,3.7464

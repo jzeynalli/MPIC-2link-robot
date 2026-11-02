@@ -25,3 +25,6 @@ slprj/
 Thumbs.db
 desktop.ini
 .vscode/
+
+# FC-MPIC benchmark logs
+fc_mpic/logs/
