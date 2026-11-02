@@ -1,0 +1,4 @@
+[submodule "external/grampc"]
+	path = external/grampc
+	url = https://github.com/grampc/grampc
+	ignore = dirty

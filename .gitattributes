@@ -1,0 +1,11 @@
+* text=auto
+
+*.m   text diff=matlab
+*.c   text
+*.h   text
+*.md  text
+
+*.mat binary
+*.slx binary
+*.mex* binary
+*.mp4 binary
