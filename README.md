@@ -19,6 +19,7 @@ controller move to a target position in free space or apply a desired force on a
 ├── forward_kinematics.m, inverse_kinematics.m, jacobian.m
 ├── twoLinkPlanarODE.m, cartesianJTController.m, printTwoLinkXdot.m   # auxiliary
 ├── docs/                           # documentation
+├── vi_mpic/                        # VI-MPIC draft and benchmark (branch vi-mpic)
 └── external/grampc/                # GRAMPC v2.3 (git submodule, unmodified)
 ```
 
@@ -46,6 +47,8 @@ startMPC(1, 1);      % free-motion scenario, no recompilation
 - [Usage guide](docs/usage.md): setup, running, scenarios, common changes, troubleshooting
 - [Model and OCP](docs/model.md): states, dynamics, cost function, parameter vector, contact model
 - [Code reference](docs/code-reference.md): every file and function
+- [VI-MPIC draft and evaluation](docs/vi-mpic.md): variable-impedance MPIC for this robot and a
+  benchmark against classical MPIC (code in [vi_mpic/](vi_mpic))
 
 ## Author
 
