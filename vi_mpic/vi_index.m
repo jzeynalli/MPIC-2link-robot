@@ -35,5 +35,6 @@ I.Qr     = 45:46;   % weights on the desired-frame position FK(qd) (x, y)
 I.vark   = 47;      % 1: ds/dt is a decision variable (VI-MPIC)
 I.Qv     = 48;      % weight on the normal reference velocity
 I.vapp   = 49;      % desired normal reference velocity [m/s]
-I.len    = 49;
+I.vdesy  = 50;      % velocity of the EE target along y (sliding) [m/s]
+I.len    = 50;
 end

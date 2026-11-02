@@ -49,6 +49,8 @@ startMPC(1, 1);      % free-motion scenario, no recompilation
 - [Code reference](docs/code-reference.md): every file and function
 - [VI-MPIC draft and evaluation](docs/vi-mpic.md): variable-impedance MPIC for this robot and a
   benchmark against classical MPIC (code in [vi_mpic/](vi_mpic))
+- [VI-MPIC v2](docs/vi-mpic-v2.md): what makes VI-MPIC better, a 1 kHz contact reflex, and a
+  sliding task over an uncertain surface
 
 ## Author
 

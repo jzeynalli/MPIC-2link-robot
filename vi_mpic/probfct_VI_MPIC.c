@@ -85,6 +85,7 @@
 #define UP_VARK   46   /* 1: ds/dt is a decision variable (VI-MPIC), 0: fixed gains */
 #define UP_QV     47   /* weight on the normal reference velocity J0(1,:) dqd/dt    */
 #define UP_VAPP   48   /* desired normal reference velocity (guarded approach) [m/s] */
+#define UP_VDESY  49   /* velocity of the EE target along y (sliding) [m/s]        */
 
 #define UP(i) (((const double *)userparam)[i])
 
@@ -185,13 +186,14 @@ static void fkin(double *pe, double *J, ctypeRNum *q)
     J[3] = LINK2 * c12;
 }
 
-/* EE position target at horizon time t: hold, or guarded approach ramp along x */
+/* EE position target at horizon time t: hold, optional ramp along x, and a
+ * target moving along y while sliding on the wall */
 static void target(double *pd, double t, typeUSERPARAM *userparam)
 {
     const double tm = t - UP(UP_TDELAY);
 
     pd[0] = UP(UP_PDES);
-    pd[1] = UP(UP_PDES + 1);
+    pd[1] = UP(UP_PDES + 1) + UP(UP_VDESY) * t;
     if (UP(UP_VDES) > 0.0 && tm > 0.0)
     {
         pd[0] += UP(UP_VDES) * tm;

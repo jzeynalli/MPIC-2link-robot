@@ -1,4 +1,4 @@
-function M = vi_metrics(L, Fn, P)
+function M = vi_metrics(L, Fn, P, t_slide)
 %VI_METRICS Performance measures of one closed-loop run.
 %   e_track_rms/max  EE position error in the disturbance window [m]
 %   t_approach       start of the approach to first contact [s]
@@ -9,7 +9,16 @@ function M = vi_metrics(L, Fn, P)
 %   F_rmse_end       RMS force error over the last 0.5 s [N]
 %   k_contact        normal stiffness at first contact [N/m]
 %   cpu_med/cpu_max  GRAMPC time per step [ms]
+%   With the sliding task (t_slide finite), over the sliding time except
+%   its first 0.1 s:
+%   F_rmse_slide     RMS force error [N]
+%   F_dev_slide      largest |F - F_des| [N]
+%   y_rmse_slide     RMS error of the tangential position [m]
+%   k_slide          mean normal stiffness [N/m]
 
+if nargin < 4
+    t_slide = inf;
+end
 Fd = P.task.F_des;
 w = L.t >= P.task.track_window(1) & L.t <= P.task.track_window(2);
 e = sqrt(sum((L.p(w, :) - P.task.pA').^2, 2));
@@ -43,4 +52,19 @@ M.overshoot = max(0, M.F_peak - Fd);
 M.F_rmse_end = sqrt(mean((Fn.F(Fn.t >= P.task.T_sim - 0.5) - Fd).^2));
 M.cpu_med = median(L.cpu);
 M.cpu_max = max(L.cpu);
+
+M.F_rmse_slide = NaN;
+M.F_dev_slide = NaN;
+M.y_rmse_slide = NaN;
+M.k_slide = NaN;
+if isfinite(t_slide)
+    ws = Fn.t >= t_slide + 0.1 & Fn.t <= t_slide + P.task.slide.dur;
+    wc = L.t >= t_slide + 0.1 & L.t <= t_slide + P.task.slide.dur;
+    if any(ws)
+        M.F_rmse_slide = sqrt(mean((Fn.F(ws) - Fd).^2));
+        M.F_dev_slide = max(abs(Fn.F(ws) - Fd));
+        M.y_rmse_slide = sqrt(mean((L.p(wc, 2) - L.pdes(wc, 2)).^2));
+        M.k_slide = mean(L.k(wc, 1));
+    end
+end
 end

@@ -41,6 +41,15 @@ P.task.F_des        = 5;                    % desired normal force [N]
 P.task.T_sim        = 3.5;                  % simulated time [s]
 P.task.offsets      = P.belief.sigma0 * (-2:0.5:2);          % true minus believed wall position [m]
 
+% sliding task (E3 of the notes, off by default): after contact, slide along
+% +y while pressing, over a wall with an unknown sinusoidal waviness
+P.task.slide.enable = false;
+P.task.slide.wait   = 0.4;                  % first contact to start of sliding [s]
+P.task.slide.v      = 0.05;                 % sliding speed [m/s]
+P.task.slide.dur    = 1.0;                  % sliding time [s]
+P.task.slide.A      = 2e-3;                 % waviness amplitude [m]
+P.task.slide.lambda = 0.05;                 % waviness wavelength [m]
+
 % MPC (GRAMPC)
 P.mpc.dt          = 0.01;                   % sampling time [s]
 P.mpc.Thor        = 0.5;                    % prediction horizon [s]
