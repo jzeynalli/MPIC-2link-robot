@@ -25,3 +25,12 @@ slprj/
 Thumbs.db
 desktop.ini
 .vscode/
+
+# LaTeX build files (docs/report)
+*.aux
+*.fdb_latexmk
+*.fls
+*.out
+*.toc
+*.synctex.gz
+docs/report/*.log
